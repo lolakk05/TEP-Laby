@@ -1,0 +1,4 @@
+liczba parametrów do komendy, komunikat za dużo parametrow, jak się nie zgadza nie wykonać
+
+kiedy użytkownik podaje wartości zmiennych można zrobić sobie słownik,
+jak trafimy na wezel liscia ze zmienna to sprawdzamy słownik  jak nie ma tej zmiennej to blad

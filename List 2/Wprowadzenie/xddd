@@ -1,0 +1,144 @@
+//
+// Created by kstol on 1.11.2026.
+//
+
+#include "Number.h"
+#include <string>
+#include <iostream>
+#include "utils.h"
+
+Number::Number(unsigned int size):
+    size(size),
+    pTab(new int[size]) {}
+
+Number::Number(const Number& other):
+    pTab(new int[other.size]),
+    size(other.size) {
+    for (int i = 0; i < size; i++) {
+        pTab[i] = other.pTab[i];
+    }
+}
+
+Number::~Number() {
+    delete [] pTab;
+}
+
+Number& Number::operator=(const int value) {
+    delete [] pTab;
+
+    bool isNegative = value < 0;
+    int abs = value < 0 ? -value : value;
+
+    int length = 1;
+    int temp = abs;
+    while (temp > 0) {
+        temp /= BASE_NUM;
+        length += 1;
+    }
+
+    size = abs == 0 ? 2 : length;
+    pTab = new int[size];
+
+    temp = abs;
+    for (int i = 0; i < size - 1; i++) {
+        pTab[i] = isNegative ? 9 - (temp % BASE_NUM) : temp % BASE_NUM;
+        temp /= BASE_NUM;
+    }
+
+    pTab[size - 1] = isNegative ? 9 : 0;
+
+    if (isNegative) {
+        int carry = 1;
+        int i = 0;
+        while (carry == 1) {
+            pTab[i] = pTab[i] + carry;
+            if (pTab[i] < 10) {
+                carry = 0;
+            } else {
+                pTab[i] = 0;
+                i++;
+            }
+        }
+    }
+
+    return *this;
+}
+
+Number& Number::operator=(Number other) {
+    std::swap(size, other.size);
+    std::swap(pTab, other.pTab);
+
+    return *this;
+}
+
+Number Number::operator+(const Number &other) {
+    int length = size > other.size ? size : other.size;
+    length += 1;
+
+    int num, numOther;
+    int carry = 0;
+    int sum;
+
+    int* result = new int[length];
+
+    for (int i = 0; i < length; i++) {
+        num = i < size ? pTab[i] : pTab[size - 1];
+        numOther = i < other.size ? other.pTab[i] : other.pTab[other.size - 1];
+
+        sum = num + numOther + carry;
+        if (sum > 9) {
+            sum -= BASE_NUM;
+            carry = 1;
+        } else {
+            carry = 0;
+        }
+
+        result[i] = sum;
+    }
+
+    while (length > 2 && result[length - 1] == result[length - 2]) {
+        length--;
+    }
+
+    Number resultNumber(length);
+    for (int i = 0; i < length; i++) {
+        resultNumber.pTab[i] = result[i];
+    }
+    delete [] result;
+    return resultNumber;
+
+}
+
+Number Number::operator-(const Number &other) {
+    Number opposite(other);
+
+    for (int i = 0; i < opposite.size; i++) {
+        opposite.pTab[i] = 9 - opposite.pTab[i];
+    }
+
+    int carry = 1;
+    int i = 0;
+    while (carry == 1 && i < opposite.size) {
+        opposite.pTab[i] = opposite.pTab[i] + carry;
+        if (opposite.pTab[i] < 10) {
+            carry = 0;
+        } else {
+            opposite.pTab[i] = 0;
+            i++;
+        }
+    }
+
+    return *this + opposite;
+}
+
+Number Number::operator*(const Number &other) {
+
+}
+
+std::string Number::toStr() {
+    std::string result;
+    for (int i = size - 1; i >= 0; i--) {
+        result += '0' + pTab[i];
+    }
+    return result;
+}
